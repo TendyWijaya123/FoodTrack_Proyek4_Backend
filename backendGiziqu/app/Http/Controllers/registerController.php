@@ -6,31 +6,51 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Kreait\Firebase\Contract\Database;
 
 class registerController extends Controller
 {
+    protected $database;
+    protected $table;
+
+    public function __construct(Database $database)
+    {
+        $this->database = $database;
+        $this->table = "user";
+    }
+
     public function store(Request $request)
     {
-        // try {
-        $validatedData = $request->validate([
-            'name' => 'required|max:50',
-            'username' => 'required|unique:users',
-            'email' => 'required|email:dns|unique:users',
-            'password' => 'required|min:8'
-        ]);
+        $role = "user";
+        $username = $request->input('username');
+        $email = $request->input('email');
 
-        $user = User::create([
-            'name' => $validatedData['name'],
-            'username' => $validatedData['username'],
-            'email' => $validatedData['email'],
-            'password' => Hash::make($validatedData['password']),
-        ]);
+        $usernameExists = $this->database->getReference($this->table)->orderByChild('username')->equalTo($username)->getSnapshot()->getValue();
 
-        return response()->json(['message' => 'Registration successful'], 200);
-        // } catch (ValidationException $e) {
-        //     return response()->json(['error' => $e->errors()], 400);
-        // } catch (\Exception $e) {
-        //     return response()->json(['error' => 'Registration failed'], 500);
-        // }
+        if (count($usernameExists) > 0) {
+            return response()->json(['message' => 'Username sudah digunakan'], 422);
+        }
+
+        // Periksa keunikan email di Firebase
+        $emailExists = $this->database->getReference($this->table)->orderByChild('email')->equalTo($email)->getSnapshot()->getValue();
+
+        if (count($emailExists) > 0) {
+            return response()->json(['message' => 'Email sudah digunakan'], 422);
+        }
+
+        $postData = [
+            'name' => $request->input("name"),
+            'username' => $request->input("username"),
+            'email' => $request->input("email"),
+            'password' => Hash::make($request->input("password")),
+            'role' => $role
+        ];
+
+        $postRef = $this->database->getReference($this->table)->push($postData);
+        if ($postRef) {
+            return response()->json(['message' => 'Registration successful'], 200);
+        } else {
+            return response()->json(['message' => 'Registration failed'], 400);
+        }
     }
 }

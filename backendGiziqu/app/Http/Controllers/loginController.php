@@ -3,10 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Kreait\Firebase\Contract\Auth;
+use Kreait\Firebase\Exception\Auth\FailedToVerifyToken;
+use Kreait\Firebase\Exception\Auth\UserNotFound;
+use Illuminate\Support\Facades\Hash;
+use Kreait\Firebase\Contract\Database;
 
-class loginController extends Controller
+class LoginController extends Controller
 {
+    protected $auth;
+    protected $database;
+    protected $table;
+
+    public function __construct(Auth $auth, Database $database)
+    {
+        $this->auth = $auth;
+        $this->database = $database;
+        $this->table = "user";
+    }
+
     public function login(Request $request)
     {
         $data = $request->validate([
@@ -14,26 +29,44 @@ class loginController extends Controller
             'password' => 'required'
         ]);
 
-        // Check if the user is an admin based on static credentials
-        $isAdmin = ($data['username'] == 'admin1' && $data['password'] == 'admin123');
+        $username = $data['username'];
+        $password = $data['password'];
 
-        // Jika pengguna merupakan admin, kirimkan respons berhasil dengan isAdmin true
-        if ($isAdmin) {
-            return response()->json(['message' => 'login berhasil', 'isAdmin' => true], 200);
-        }
+        try {
+            // Ambil informasi pengguna berdasarkan username
+            $userData = $this->getUserByUsername($username);
 
-        // Jika bukan admin, coba autentikasi pengguna menggunakan Auth
-        if (auth()->attempt($data)) {
-            // Jika autentikasi berhasil, kirimkan respons berhasil dengan isAdmin false
-            $user = auth()->user();
+            // Periksa apakah pengguna ditemukan
+            if (!$userData) {
+                return response()->json(['message' => 'Pengguna tidak ditemukan'], 404);
+            }
+
+            // Periksa kecocokan password
+            if (!Hash::check($password, $userData['password'])) {
+                return response()->json(['message' => 'Password salah'], 401);
+            }
+
+            // Login berhasil
             return response()->json([
-                'message' => 'login berhasil',
-                'isAdmin' => false,
-                'name' => $user->name
+                'message' => 'Login berhasil',
+                'user' => $userData
             ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan saat mencoba login'], 500);
         }
+    }
 
-        // Jika autentikasi gagal, kirimkan respons gagal
-        return response()->json(['message' => 'login gagal'], 401);
+    public function getUserByUsername($username)
+    {
+        $userRef = $this->database->getReference($this->table)
+            ->orderByChild('username')
+            ->equalTo($username)
+            ->getSnapshot()
+            ->getValue();
+
+        // Ambil data pengguna pertama jika ditemukan
+        $userData = reset($userRef);
+
+        return $userData;
     }
 }

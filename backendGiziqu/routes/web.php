@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\adminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,5 +17,10 @@ use App\Http\Controllers\RegisterController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/tambahAdmin', [adminController::class, 'tambah']);
+Route::get('/dataAdmin', [adminController::class, 'data'])->name("dataAdmin.admin");;
+Route::post('/tambahAdmin', [adminController::class, 'admin'])->name("tambahAdmin.admin");
+Route::get('/deleteAdmin/{username}', [AdminController::class, 'delete'])->name('deleteAdmin.delete');
 
 // Route::get('/daftar', [registerController::class, 'store']);
