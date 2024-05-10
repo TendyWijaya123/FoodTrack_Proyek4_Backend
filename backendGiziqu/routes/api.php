@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\adminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
@@ -20,3 +21,5 @@ use App\Http\Controllers\loginController;
 Route::post('/daftar', [registerController::class, 'store']);
 
 Route::post('/login', [loginController::class, 'login']);
+
+Route::post('/image', [adminController::class, 'uploudimage']);
