@@ -25,16 +25,16 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'username' => 'required',
+            'email' => 'required',
             'password' => 'required'
         ]);
 
-        $username = $data['username'];
+        $email = $data['email'];
         $password = $data['password'];
 
         try {
             // Ambil informasi pengguna berdasarkan username
-            $userData = $this->getUserByUsername($username);
+            $userData = $this->getUserByUsername($email);
 
             // Periksa apakah pengguna ditemukan
             if (!$userData) {
@@ -46,6 +46,8 @@ class LoginController extends Controller
                 return response()->json(['message' => 'Password salah'], 401);
             }
 
+
+            $signInResult = $this->auth->signInWithEmailAndPassword($email, $password);
             // Login berhasil
             return response()->json([
                 'message' => 'Login berhasil',
@@ -56,10 +58,15 @@ class LoginController extends Controller
         }
     }
 
+    // public function logout()
+    // {
+    //     $this->
+    // }
+
     public function getUserByUsername($username)
     {
         $userRef = $this->database->getReference($this->table)
-            ->orderByChild('username')
+            ->orderByChild('email')
             ->equalTo($username)
             ->getSnapshot()
             ->getValue();

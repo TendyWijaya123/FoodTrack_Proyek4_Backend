@@ -7,16 +7,22 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Kreait\Firebase\Contract\Database;
+use Kreait\Firebase\Contract\Auth;
+
 
 class registerController extends Controller
 {
     protected $database;
     protected $table;
+    protected $auth;
 
-    public function __construct(Database $database)
+
+
+    public function __construct(Auth $auth, Database $database)
     {
         $this->database = $database;
         $this->table = "user";
+        $this->auth = $auth;
     }
 
     public function store(Request $request)
@@ -26,8 +32,10 @@ class registerController extends Controller
         $email = $request->input('email');
 
         $usernameExists = $this->database->getReference($this->table)->orderByChild('username')->equalTo($username)->getSnapshot()->getValue();
+        $emailExists = $this->database->getReference($this->table)->orderByChild('username')->equalTo($email)->getSnapshot()->getValue();
 
-        if (count($usernameExists) > 0) {
+
+        if (count($usernameExists) > 0 || count($emailExists) > 0) {
             return response()->json(['message' => 'Username sudah digunakan'], 422);
         }
 
@@ -45,6 +53,16 @@ class registerController extends Controller
             'password' => Hash::make($request->input("password")),
             'role' => $role
         ];
+
+        $userProperties = [
+            'email' => $request->input("email"),
+            'emailVerified' => false,
+            'password' => $request->input("password"),
+            'displayName' => $request->input("name"),
+            'disabled' => false,
+        ];
+
+        $createdUser = $this->auth->createUser($userProperties);
 
         $postRef = $this->database->getReference($this->table)->push($postData);
         if ($postRef) {
