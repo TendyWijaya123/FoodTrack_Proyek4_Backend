@@ -24,11 +24,8 @@ use App\Http\Controllers\ArtikelController;
 
 Route::post('/daftar', [registerController::class, 'store']);
 
-Route::post('/login', [loginController::class, 'login']);
+Route::post('/getDataUser', [loginController::class, 'getData']);
 
-<<<<<<< HEAD
-Route::post('/image', [adminController::class, 'uploudimage']);
-=======
 
 
 Route::post('/create_makanan', [MakananController::class, 'create_makanan']);
@@ -39,4 +36,4 @@ Route::post('/create_artikel_makanan', [ArtikelController::class, 'create_artike
 Route::post('/update_artikel_makanan', [ArtikelController::class, 'update_artikel_makanan']);
 Route::post('/delete_artikel_makanan', [ArtikelController::class, 'delete_artikel_makanan']);
 Route::get('/read_semua_artikel_makanan', [ArtikelController::class, 'read_semua_artikel_makanan']);
->>>>>>> edd30bd940c22ed8866bbb827f76a552a39812e4
+Route::post('/image', [adminController::class, 'uploudimage']);
