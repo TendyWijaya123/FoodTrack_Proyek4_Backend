@@ -146,4 +146,7 @@ class MakananController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
     }
+
+
+    
 }
