@@ -6,6 +6,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\loginController;
 use App\Http\Controllers\MakananController;
 use App\Http\Controllers\ArtikelController;
+use App\Http\Controllers\ProfileController;
 
 
 
@@ -35,3 +36,5 @@ Route::post('/create_artikel_makanan', [ArtikelController::class, 'create_artike
 Route::post('/update_artikel_makanan', [ArtikelController::class, 'update_artikel_makanan']);
 Route::post('/delete_artikel_makanan', [ArtikelController::class, 'delete_artikel_makanan']);
 Route::get('/read_semua_artikel_makanan', [ArtikelController::class, 'read_semua_artikel_makanan']);
+
+Route::post('/create_update_profile_diri', [ProfileController::class, 'create_update_profile_diri']);
