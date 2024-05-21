@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Hash;
 use Kreait\Firebase\Contract\Database;
+// use Kreait\Firebase\Contract\Storage;
+use Kreait\Firebase\Contract\Storage;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\ServiceAccount;
+
 use Kreait\Firebase\Database\Query\Filter\IsNull;
 
 use Illuminate\Http\Request;
@@ -12,11 +17,14 @@ class adminController extends Controller
 {
     protected $database;
     protected $table;
+    protected $storage;
 
-    public function __construct(Database $database)
+    public function __construct(Database $database, Storage $storage)
     {
         $this->database = $database;
         $this->table = "user";
+        $this->database = \App\Services\FirebaseService::connect();
+        $this->storage = $storage;
     }
 
     public function tambah()
@@ -51,13 +59,23 @@ class adminController extends Controller
         if (count($emailExists) > 0) {
             return view('/tambahAdmin', ['msg' => "email admin sudah tersedia", 'judul' => "Tambah Admin"]);
         }
+        // Path gambar yang sudah ada di direktori public/img
+        $localImagePath = public_path('img/default.jpeg');
+        // Membaca konten gambar
+        $imageContent = file_get_contents($localImagePath);
+        $firebaseStoragePath = 'Images/Users/';
+        $fileName = 'default.jpeg'; // Sesuaikan nama file yang diinginkan
+        $this->storage->getBucket()->upload($imageContent, [
+            'name' => $firebaseStoragePath . $fileName,
+        ]);
 
         $postData = [
             'name' => $request->input("name"),
             'username' => $request->input("username"),
             'email' => $request->input("email"),
             'password' => Hash::make($request->input("password")),
-            'role' => $role
+            'role' => $role,
+            'foto' => $fileName
         ];
 
         $postRef = $this->database->getReference($this->table)->push($postData);

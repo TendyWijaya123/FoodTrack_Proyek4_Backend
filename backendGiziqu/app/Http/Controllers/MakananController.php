@@ -67,6 +67,7 @@ class MakananController extends Controller
             'jenis' => $jenis,
             'foto' => $fileName,
             'gizi' => $gizi,
+            'takaran' => $request->input('takaran_per_saji'),
         ];
 
         // Simpan data ke database
@@ -146,7 +147,4 @@ class MakananController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
     }
-
-
-    
 }

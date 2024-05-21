@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\adminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
@@ -26,6 +27,8 @@ Route::post('/daftar', [registerController::class, 'store']);
 
 Route::post('/login', [loginController::class, 'login']);
 
+Route::post('/image', [adminController::class, 'uploudimage']);
+
 
 
 Route::post('/create_makanan', [MakananController::class, 'create_makanan']);
@@ -36,5 +39,6 @@ Route::post('/create_artikel_makanan', [ArtikelController::class, 'create_artike
 Route::post('/update_artikel_makanan', [ArtikelController::class, 'update_artikel_makanan']);
 Route::post('/delete_artikel_makanan', [ArtikelController::class, 'delete_artikel_makanan']);
 Route::get('/read_semua_artikel_makanan', [ArtikelController::class, 'read_semua_artikel_makanan']);
+
 
 Route::post('/create_update_profile_diri', [ProfileController::class, 'create_update_profile_diri']);
