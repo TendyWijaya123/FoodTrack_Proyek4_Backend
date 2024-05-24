@@ -35,7 +35,6 @@ class MakananController extends Controller
         }
         $nama_makanan = $request->input('nama_makanan');
         $jenis = $request->input('jenis');
-        // $foto = $request->input('foto');
         $image = $request->file('image');
         $firebaseStoragePath = 'Images/MakananImage/';
         $fileName = $barcode . '_' . $image->getClientOriginalName();
@@ -96,9 +95,9 @@ class MakananController extends Controller
             ->getSnapshot();
 
         $results = [];
-
         // Ambil hasil pencarian
         foreach ($query->getValue() as $barcode => $makanan) {
+            dd($makanan);
             if ($barcode === $keyword || stripos($makanan['nama_makanan'], $keyword) !== false) {
                 $makanan['barcode'] = $barcode;
                 $results[] = $makanan;

@@ -10,7 +10,7 @@
             </div>
             @endif
 
-            <form action="{{ route('tambahAdmin.admin') }}" method="post">
+            <form action="{{ route('tambahAdmin.admin') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
                     <label for="name" class="form-label">Nama</label>
@@ -28,9 +28,14 @@
                     <label for="password" class="form-label">Password</label>
                     <input type="password" class="form-control" id="password" placeholder="Password" name="password">
                 </div>
+                <div class="mb-3">
+                    <label for="photo" class="form-label">Foto</label>
+                    <input type="file" class="form-control" id="foto" name="foto">
+                </div>
 
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+
         </div>
     </div>
 </div>

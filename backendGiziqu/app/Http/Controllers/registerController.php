@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Contract\Auth;
+use Kreait\Firebase\Contract\Storage;
 
 
 class registerController extends Controller
@@ -15,14 +16,16 @@ class registerController extends Controller
     protected $database;
     protected $table;
     protected $auth;
+    protected $storage;
 
 
 
-    public function __construct(Auth $auth, Database $database)
+    public function __construct(Auth $auth, Database $database, Storage $storage)
     {
         $this->database = $database;
         $this->table = "user";
         $this->auth = $auth;
+        $this->storage = $storage;
     }
 
     public function store(Request $request)
@@ -46,12 +49,30 @@ class registerController extends Controller
             return response()->json(['message' => 'Email sudah digunakan'], 422);
         }
 
+        $fileName = 'default.jpeg';
+        if ($request->hasFile('foto')) {
+            $foto = $request->file('foto');
+            $fileName = $foto->getClientOriginalName();
+            $firebaseStoragePath = 'Images/Users/';
+            $localFolder = public_path('firebase-temp-uploads') . '/';
+            $localPath = $localFolder . $fileName;
+
+            if ($foto->move($localFolder, $fileName)) {
+                $uploadedfile = fopen($localPath, 'r');
+                $this->storage->getBucket()->upload($uploadedfile, [
+                    'name' => $firebaseStoragePath . $fileName
+                ]);
+                unlink($localPath);
+            }
+        }
+
         $postData = [
             'name' => $request->input("name"),
             'username' => $request->input("username"),
             'email' => $request->input("email"),
-            'password' => Hash::make($request->input("password")),
-            'role' => $role
+            'password' => $request->input("password"),
+            'role' => $role,
+            'foto' => $fileName
         ];
 
         $userProperties = [
@@ -62,7 +83,7 @@ class registerController extends Controller
             'disabled' => false,
         ];
 
-        $createdUser = $this->auth->createUser($userProperties);
+        $this->auth->createUser($userProperties);
 
         $postRef = $this->database->getReference($this->table)->push($postData);
         if ($postRef) {

@@ -15,6 +15,7 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -29,7 +30,6 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -55,14 +55,14 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-        'images' => [
-            'driver' => 'local',
-            'root' => storage_path('app/images'), // Sesuaikan path penyimpanan gambar
-            'url' => env('APP_URL') . '/storage/images', // Sesuaikan URL penyimpanan gambar
-            'visibility' => 'public',
-        ],
 
+        'firebase' => [
+            'driver' => 'firebase',
+            'credentials' => storage_path('app/firebase_credentials.json'),
+            'default_bucket' => env('FIREBASE_STORAGE_BUCKET', 'your-bucket-name'),
+        ],
     ],
+
 
     /*
     |--------------------------------------------------------------------------
