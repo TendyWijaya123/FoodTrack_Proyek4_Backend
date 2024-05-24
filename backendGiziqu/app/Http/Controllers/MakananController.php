@@ -97,7 +97,6 @@ class MakananController extends Controller
         $results = [];
         // Ambil hasil pencarian
         foreach ($query->getValue() as $barcode => $makanan) {
-            dd($makanan);
             if ($barcode === $keyword || stripos($makanan['nama_makanan'], $keyword) !== false) {
                 $makanan['barcode'] = $barcode;
                 $results[] = $makanan;
