@@ -38,3 +38,5 @@ Route::get('/read_semua_artikel_makanan', [ArtikelController::class, 'read_semua
 
 Route::post('/image', [adminController::class, 'uploadimage']);
 Route::post('/create_update_profile_diri', [ProfileController::class, 'create_update_profile_diri']);
+Route::get('/read_profile_by_email', [ProfileController::class, 'read_profile_by_email']);
+Route::get('/read_kebutuhan_gizi_by_email', [ProfileController::class, 'read_kebutuhan_gizi_by_email']);
