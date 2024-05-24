@@ -22,39 +22,23 @@ class LoginController extends Controller
         $this->table = "user";
     }
 
-    public function login(Request $request)
+    public function getData(Request $request)
     {
         $data = $request->validate([
             'email' => 'required',
-            'password' => 'required'
         ]);
 
         $email = $data['email'];
-        $password = $data['password'];
 
         try {
             // Ambil informasi pengguna berdasarkan username
-            $userData = $this->getUserByUsername($email);
-
-            // Periksa apakah pengguna ditemukan
-            if (!$userData) {
-                return response()->json(['message' => 'Pengguna tidak ditemukan'], 404);
-            }
-
-            // Periksa kecocokan password
-            if (!Hash::check($password, $userData['password'])) {
-                return response()->json(['message' => 'Password salah'], 401);
-            }
-
-
-            $signInResult = $this->auth->signInWithEmailAndPassword($email, $password);
-            // Login berhasil
+            $userData = $this->getUserByEmail($email);
             return response()->json([
-                'message' => 'Login berhasil',
+                'message' => 'Data berhasil diambil',
                 'user' => $userData
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Terjadi kesalahan saat mencoba login'], 500);
+            return response()->json(['message' => 'Terjadi kesalahan saat mencoba mengambil data'], 500);
         }
     }
 
@@ -63,11 +47,11 @@ class LoginController extends Controller
     //     $this->
     // }
 
-    public function getUserByUsername($username)
+    public function getUserByEmail($email)
     {
         $userRef = $this->database->getReference($this->table)
             ->orderByChild('email')
-            ->equalTo($username)
+            ->equalTo($email)
             ->getSnapshot()
             ->getValue();
 
