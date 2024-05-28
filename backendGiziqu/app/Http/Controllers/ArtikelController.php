@@ -21,18 +21,24 @@ class ArtikelController extends Controller
     public function create_artikel_makanan(Request $request)
     {
         $table_name = 'artikel_makanans';
-        $id = $request->input('id');
 
-        $existingArtikel = $this->database->getReference($table_name)
-            ->orderByChild('id')
-            ->equalTo($id)
-            ->getSnapshot()->getValue();
+        // Retrieve all existing IDs
+        $allIdsSnapshot = $this->database->getReference($table_name)->getSnapshot()->getValue();
 
-        // Periksa apakah barcode sudah ada
-        if (!empty($existingArtikel)) {
-            // Jika sudah ada, kembalikan respons barcode sudah digunakan
-            return response()->json(['message' => 'Barcode sudah digunakan'], 400);
+        $allIds = [];
+        if ($allIdsSnapshot) {
+            foreach ($allIdsSnapshot as $key => $value) {
+                $allIds[] = (int) $key;
+            }
         }
+
+        // Sort the IDs to find the highest one
+        sort($allIds);
+
+        // Generate the next ID
+        $nextId = !empty($allIds) ? end($allIds) + 1 : 1;
+        $id = (string) $nextId;
+
         $nama_artikel = $request->input('nama_artikel');
         $jenis = $request->input('jenis');
 
@@ -47,11 +53,6 @@ class ArtikelController extends Controller
         $deskripsi = $request->input('deskripsi');
         $link = $request->input('link');
 
-
-
-        // Gizi
-
-
         // Buat data makanan
         $makananData = [
             'id' => $id,
@@ -60,19 +61,14 @@ class ArtikelController extends Controller
             'foto' => $fileName,
             'deskripsi' => $deskripsi,
             'link' => $link,
-
-
         ];
 
         // Simpan data ke database
         $postRef = $this->database->getReference($table_name)->getChild($id)->set($makananData);
 
-        // Periksa apakah penyimpanan berhasil
         if ($postRef) {
-            // Jika berhasil, kembalikan respon berhasil
             return response()->json(['message' => 'Data berhasil dipost'], 200);
         } else {
-            // Jika gagal, kembalikan respon gagal
             return response()->json(['message' => 'Gagal memproses permintaan'], 500);
         }
     }
@@ -152,23 +148,37 @@ class ArtikelController extends Controller
         }
     }
 
-
-
-    public function delete_artikel_makanan(Request $request)
+    public function deleteArtikel(Request $request)
     {
         $table_name = 'artikel_makanans';
         $id = $request->input('id');
 
-        // Hapus artikel makanan berdasarkan ID
-        $deleteRef = $this->database->getReference($table_name)->getChild($id)->remove();
+        // Cari makanan berdasarkan barcode
+        $artikelRef = $this->database->getReference($table_name)->getChild($id);
 
-        // Periksa apakah penghapusan berhasil
-        if ($deleteRef) {
-            // Jika berhasil, kembalikan respons berhasil
+        // Periksa apakah makanan ada
+        if ($artikelRef->getSnapshot()->exists()) {
+            // Dapatkan data makanan
+            $artikelData = $artikelRef->getValue();
+
+            // Hapus gambar dari Firebase Storage jika ada
+            if (isset($artikelData['foto'])) {
+                $fileName = $artikelData['foto'];
+                $firebaseStoragePath = 'Images/ArtikelImage/';
+                $filePath = $firebaseStoragePath . $fileName;
+
+                // Hapus file dari storage
+                $this->storage->getBucket()->object($filePath)->delete();
+            }
+
+            // Hapus data dari database
+            $artikelRef->remove();
+
+            // Kembalikan respon berhasil
             return response()->json(['message' => 'Data berhasil dihapus'], 200);
         } else {
-            // Jika gagal, kembalikan respons gagal
-            return response()->json(['message' => 'Gagal menghapus data'], 500);
+            // Kembalikan respon tidak ditemukan
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
     }
 }

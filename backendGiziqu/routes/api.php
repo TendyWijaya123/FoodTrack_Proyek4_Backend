@@ -30,10 +30,12 @@ Route::post('/image', [adminController::class, 'uploudimage']);
 Route::post('/create_makanan', [MakananController::class, 'create_makanan']);
 Route::get('/makanan/search_makanan', [MakananController::class, 'search_makanan']);
 Route::get('/makanan/search_makanan_barcode', [MakananController::class, 'search_makanan_barcode']);
+Route::get('/makanan/read_makanan', [MakananController::class, 'readMakanan']);
+Route::get('/makanan/delete_makanan', [MakananController::class, 'deleteMakanan']);
 
 Route::post('/create_artikel_makanan', [ArtikelController::class, 'create_artikel_makanan']);
 Route::post('/update_artikel_makanan', [ArtikelController::class, 'update_artikel_makanan']);
-Route::post('/delete_artikel_makanan', [ArtikelController::class, 'delete_artikel_makanan']);
+Route::get('/delete_artikel_makanan', [ArtikelController::class, 'deleteArtikel']);
 Route::get('/read_semua_artikel_makanan', [ArtikelController::class, 'read_semua_artikel_makanan']);
 
 Route::post('/image', [adminController::class, 'uploadimage']);

@@ -7,19 +7,20 @@ use Kreait\Firebase\Contract\Storage;
 
 class MakananController extends Controller
 {
-    //
-    //
     private $database;
     private $storage;
+    protected $table;
 
     public function __construct(Storage $storage)
     {
         $this->database = \App\Services\FirebaseService::connect();
         $this->storage = $storage;
+        $this->table = 'makanans';
     }
 
     public function create_makanan(Request $request)
     {
+        // dd($request->input());
         $table_name = 'makanans';
         $barcode = $request->input('barcode');
 
@@ -33,6 +34,7 @@ class MakananController extends Controller
             // Jika sudah ada, kembalikan respons barcode sudah digunakan
             return response()->json(['message' => 'Barcode sudah digunakan'], 400);
         }
+
         $nama_makanan = $request->input('nama_makanan');
         $jenis = $request->input('jenis');
         $image = $request->file('image');
@@ -42,7 +44,6 @@ class MakananController extends Controller
         $this->storage->getBucket()->upload($fileContent, [
             'name' => $firebaseStoragePath . $fileName,
         ]);
-
 
         // Gizi
         $gizi = [
@@ -57,6 +58,7 @@ class MakananController extends Controller
             'vitamin_b3' => $request->input('vitamin_b3'),
             'vitamin_c' => $request->input('vitamin_c'),
             'serat' => $request->input('serat'),
+            'energi' => $request->input('energi')
         ];
 
         // Buat data makanan
@@ -67,11 +69,11 @@ class MakananController extends Controller
             'foto' => $fileName,
             'gizi' => $gizi,
             'takaran' => $request->input('takaran_per_saji'),
+            // Tambahkan data lain sesuai kebutuhan
         ];
 
         // Simpan data ke database
         $postRef = $this->database->getReference($table_name)->getChild($barcode)->set($makananData);
-
         // Periksa apakah penyimpanan berhasil
         if ($postRef) {
             // Jika berhasil, kembalikan respon berhasil
@@ -81,6 +83,13 @@ class MakananController extends Controller
             return response()->json(['message' => 'Gagal memproses permintaan'], 500);
         }
     }
+
+    public function readMakanan()
+    {
+        $dataMakanan = $this->database->getReference($this->table)->getValue();
+        return response()->json($dataMakanan, 200);
+    }
+
 
     public function search_makanan(Request $request)
     {
@@ -142,6 +151,40 @@ class MakananController extends Controller
         if (!empty($results)) {
             return response()->json(['message' => 'Data ditemukan', 'data' => $results], 200);
         } else {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+    }
+
+    public function deleteMakanan(Request $request)
+    {
+        $table_name = 'makanans';
+        $barcode = $request->input('id');
+
+        // Cari makanan berdasarkan barcode
+        $makananRef = $this->database->getReference($table_name)->getChild($barcode);
+
+        // Periksa apakah makanan ada
+        if ($makananRef->getSnapshot()->exists()) {
+            // Dapatkan data makanan
+            $makananData = $makananRef->getValue();
+
+            // Hapus gambar dari Firebase Storage jika ada
+            if (isset($makananData['foto'])) {
+                $fileName = $makananData['foto'];
+                $firebaseStoragePath = 'Images/MakananImage/';
+                $filePath = $firebaseStoragePath . $fileName;
+
+                // Hapus file dari storage
+                $this->storage->getBucket()->object($filePath)->delete();
+            }
+
+            // Hapus data dari database
+            $makananRef->remove();
+
+            // Kembalikan respon berhasil
+            return response()->json(['message' => 'Data berhasil dihapus'], 200);
+        } else {
+            // Kembalikan respon tidak ditemukan
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
     }
