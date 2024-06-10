@@ -29,6 +29,16 @@ composer install
 ## Buat .env
 ubah nama file .env/example menjadi .env  
 
+## Konfigurasi Fire Base
+Buat Realtime, storage, dan juga authentication database di firebase
+![image](https://github.com/TendyWijaya123/FoodTrack_Proyek4_Backend/assets/117370634/6b2f4836-8f89-40c8-96e5-f1da741aaa00)
+Ubah rules di realtime database di firebase seperti berikut:
+![image](https://github.com/TendyWijaya123/FoodTrack_Proyek4_Backend/assets/117370634/120922c9-ac03-4f2a-a813-3d7d050125dd)
+Buka Project Setting dan generate new private key:
+![image](https://github.com/TendyWijaya123/FoodTrack_Proyek4_Backend/assets/117370634/0dee64e7-b8a3-4b57-9240-141ef892804a)
+
+
+
 
 
 
