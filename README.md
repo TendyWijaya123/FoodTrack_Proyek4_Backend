@@ -10,7 +10,7 @@ Tendy Wijaya (221511066)<br>
 
 ## Clone Repository
 ```bash
-git clone https://github.com/mahesyasn18/SLP-BackEnd.git](https://github.com/TendyWijaya123/FoodTrack_Proyek4_Backend.git
+git clone https://github.com/TendyWijaya123/FoodTrack_Proyek4_Backend.git
 ```
 <br>
 
