@@ -19,5 +19,13 @@ cd FoodTrack_Proyek4_Backend/backendGiziqu
 ```
 
 
+## Composer Install
+```bash
+composer install
+```
+<br>
+
+
+
 
 
