@@ -2,6 +2,6 @@
 
 
 # Anggota
-Ahmad Fauzy
+Ahmad Fauzy<br>
 Muhammad Syaifullah
 Tendy Wijaya
