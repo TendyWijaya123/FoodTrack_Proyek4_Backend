@@ -3,5 +3,5 @@
 
 # Anggota
 Ahmad Fauzy<br>
-Muhammad Syaifullah
-Tendy Wijaya
+Muhammad Syaifullah<br>
+Tendy Wijaya<br>
