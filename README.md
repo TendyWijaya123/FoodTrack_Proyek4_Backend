@@ -15,7 +15,7 @@ git clone https://github.com/TendyWijaya123/FoodTrack_Proyek4_Backend.git
 <br>
 
 ```bash
-cd backendGiziqu
+cd FoodTrack_Proyek4_Backend/backendGiziqu
 ```
 
 
