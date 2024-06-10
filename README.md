@@ -1,6 +1,7 @@
 # FoodTrack_Proyek4_Backend
 
-## Apa itu Food Track?💻
+## Apa itu GiziQu?💻
+Aplikasi Giziqu adalah aplikasi  pemindaian Cerdas  Guna meningkatan literasi gizi pada makanan kemasan menggunakan teknologi Yolov8. aplikasi ini memanfaatkan teknologi pemindaian cerdas barcode untuk memberikan incormasi lengkap dan akurat tentang kemasana secara instan. Aplikasi iniini juga dirancangan untuk membantu masyarakat dalam menentukan makanna  kemasana yang sesuai berdasarkan kandungan gizinya.
 
 
 ## Anggota 🤨
