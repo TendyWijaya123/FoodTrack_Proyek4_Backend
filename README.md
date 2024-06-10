@@ -20,10 +20,14 @@ cd FoodTrack_Proyek4_Backend/backendGiziqu
 
 
 ## Composer Install
+masuk ke terminal dan lakukan install composer
 ```bash
 composer install
 ```
 <br>
+
+## Buat .env
+ubah nama file .env/example menjadi .env  
 
 
 
