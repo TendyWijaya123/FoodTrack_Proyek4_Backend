@@ -155,6 +155,68 @@ class MakananController extends Controller
         }
     }
 
+    public function update_makanan(Request $request, $barcode)
+    {
+        // dd($request, $barcode);
+        $table_name = 'makanans';
+
+        $existingMakanan = $this->database->getReference($table_name)
+            ->orderByChild('barcode')
+            ->equalTo($barcode)
+            ->getSnapshot()->getValue();
+
+        // Periksa apakah makanan dengan barcode tersebut ada
+        if (empty($existingMakanan)) {
+            return response()->json(['message' => 'Makanan tidak ditemukan'], 404);
+        }
+
+        // Dapatkan kunci dari item yang ada
+        $key = array_key_first($existingMakanan);
+
+        $nama_makanan = $request->input('nama_makanan');
+        $jenis = $request->input('jenis');
+
+        $makananData = [
+            'barcode' => $barcode,
+            'nama_makanan' => $nama_makanan,
+            'jenis' => $jenis,
+            'takaran' => $request->input('takaran_per_saji'),
+            // Tambahkan data lain sesuai kebutuhan
+        ];
+
+        // Tetapkan foto lama jika ada, atau kosong jika tidak ada
+        $makananData['foto'] = $existingMakanan[$key]['foto'] ?? '';
+
+        // Gizi
+        $gizi = [
+            'protein' => $request->input('protein') ?? $existingMakanan[$key]['gizi']['protein'],
+            'karbohidrat' => $request->input('karbohidrat') ?? $existingMakanan[$key]['gizi']['karbohidrat'],
+            'lemak' => $request->input('lemak') ?? $existingMakanan[$key]['gizi']['lemak'],
+            'kalori' => $request->input('kalori') ?? $existingMakanan[$key]['gizi']['kalori'],
+            'natrium' => $request->input('natrium') ?? $existingMakanan[$key]['gizi']['natrium'],
+            'vitamin_a' => $request->input('vitamin_a') ?? $existingMakanan[$key]['gizi']['vitamin_a'],
+            'vitamin_b1' => $request->input('vitamin_b1') ?? $existingMakanan[$key]['gizi']['vitamin_b1'],
+            'vitamin_b2' => $request->input('vitamin_b2') ?? $existingMakanan[$key]['gizi']['vitamin_b2'],
+            'vitamin_b3' => $request->input('vitamin_b3') ?? $existingMakanan[$key]['gizi']['vitamin_b3'],
+            'vitamin_c' => $request->input('vitamin_c') ?? $existingMakanan[$key]['gizi']['vitamin_c'],
+            'serat' => $request->input('serat') ?? $existingMakanan[$key]['gizi']['serat'],
+            'energi' => $request->input('energi') ?? $existingMakanan[$key]['gizi']['energi'],
+        ];
+
+        $makananData['gizi'] = $gizi;
+
+        // Update data ke database
+        $updateRef = $this->database->getReference($table_name)->getChild($key)->update($makananData);
+
+        // Periksa apakah pembaruan berhasil
+        if ($updateRef) {
+            return response()->json(['message' => 'Data berhasil diperbarui'], 200);
+        } else {
+            return response()->json(['message' => 'Gagal memperbarui data'], 500);
+        }
+    }
+
+
     public function deleteMakanan(Request $request)
     {
         $table_name = 'makanans';

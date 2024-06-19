@@ -90,7 +90,38 @@ class ArtikelController extends Controller
         }
     }
 
+    public function search_artikel(Request $request)
+    {
+        $table_name = 'artikel_makanans';
+        $keyword = intval($request->input('keyword'));
+        // Pastikan $keyword tidak null
+        if ($keyword === null) {
+            return response()->json(['message' => 'Keyword tidak diberikan'], 400);
+        }
 
+        // Lakukan pencarian berdasarkan nama makanan atau barcode
+        $query = $this->database->getReference($table_name)
+            ->orderByChild('id')
+            ->startAt($keyword)
+            ->endAt($keyword . "\uf8ff")
+            ->getSnapshot();
+        $queryValue = $query->getValue();
+
+        $results = [];
+
+        foreach ($queryValue as $barcode => $makanan) {
+            if ($barcode === $keyword || stripos($makanan['nama_artikel'], $keyword) !== false) {
+                $makanan['id'] = $barcode;
+                $results[] = $makanan;
+            }
+        }
+        // Periksa apakah ada hasil pencarian
+        if (!empty($results)) {
+            return response()->json(['message' => 'Data ditemukan', 'data' => $results], 200);
+        } else {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+    }
 
     public function update_artikel_makanan(Request $request)
     {
