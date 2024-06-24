@@ -31,6 +31,7 @@ Route::post('/create_makanan', [MakananController::class, 'create_makanan']);
 Route::post('/makanan/update_makanan/{barcode}', [MakananController::class, 'update_makanan']);
 Route::get('/makanan/search_makanan', [MakananController::class, 'search_makanan']);
 Route::get('/makanan/search_makanan_barcode', [MakananController::class, 'search_makanan_barcode']);
+Route::get('/makanan/search_makanan_by_jenis', [MakananController::class, 'search_makanan_by_jenis']);
 Route::get('/makanan/read_makanan', [MakananController::class, 'readMakanan']);
 Route::get('/makanan/delete_makanan', [MakananController::class, 'deleteMakanan']);
 

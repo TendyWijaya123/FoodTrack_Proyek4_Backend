@@ -122,6 +122,41 @@ class MakananController extends Controller
         }
     }
 
+    public function search_makanan_by_jenis(Request $request)
+    {
+        $table_name = 'makanans';
+        $jenis = $request->input('jenis');
+
+        try {
+            $query = $this->database->getReference($table_name)
+                ->orderByChild('jenis')
+                ->equalTo($jenis)
+                ->getSnapshot();
+
+            $results = [];
+            foreach ($query->getValue() as $barcode => $makanan) {
+                $makanan['barcode'] = $barcode;
+                $results[] = $makanan;
+            }
+
+            if (!empty($results)) {
+                // Shuffle the results array to randomize the order
+                shuffle($results);
+
+                // Select up to two random instances
+                $randomResults = array_slice($results, 0, 2);
+
+                return response()->json(['message' => 'Data ditemukan', 'data' => $randomResults], 200);
+            } else {
+                return response()->json(['message' => 'Data tidak ditemukan'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+
     public function search_makanan_barcode(Request $request)
     {
         $table_name = 'makanans';
