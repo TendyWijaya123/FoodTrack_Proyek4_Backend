@@ -160,7 +160,7 @@ class MakananController extends Controller
     public function search_makanan_barcode(Request $request)
     {
         $table_name = 'makanans';
-        $keyword = intval($request->input('keyword'));
+        $keyword = $request->input('keyword');
         // Pastikan $keyword tidak null
         if ($keyword === null) {
             return response()->json(['message' => 'Keyword tidak diberikan'], 400);
@@ -284,5 +284,63 @@ class MakananController extends Controller
             // Kembalikan respon tidak ditemukan
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
+    }
+
+    public function rekomendasi_makanan(Request $request)
+    {
+        $email = $request->input('email');
+
+        // Ambil data profil dan kebutuhan gizi
+        $profile = $this->database->getReference('data_profile')
+            ->orderByChild('email')
+            ->equalTo($email)
+            ->getSnapshot()
+            ->getValue();
+
+        if (!$profile) {
+            return response()->json(['message' => 'Profile not found'], 404);
+        }
+
+        $profile = array_values($profile)[0];
+        $kebutuhanGizi = $this->database->getReference('data_kebutuhan_gizi')
+            ->orderByChild('email')
+            ->equalTo($email)
+            ->getSnapshot()
+            ->getValue();
+
+        if (!$kebutuhanGizi) {
+            return response()->json(['message' => 'Nutritional needs not found'], 404);
+        }
+
+        $kebutuhanGizi = array_values($kebutuhanGizi)[0];
+
+        // Daftar makanan dengan kandungan gizi per porsi
+        $makanan = $this->readMakanan()->getData(true);
+
+        $rekomendasi = [];
+
+        foreach ($makanan as $item) {
+            $gizi = $item['gizi'];
+            // dd($gizi['kalori']);
+            if (isset($gizi['kalori'], $gizi['protein'], $gizi['lemak'], $gizi['karbohidrat'])) {
+                if (
+                    $gizi['kalori'] <= $kebutuhanGizi['kalori'] * 0.2 &&
+                    $gizi['protein'] <= $kebutuhanGizi['protein'] * 0.2 &&
+                    $gizi['lemak'] <= $kebutuhanGizi['lemak'] * 0.2 &&
+                    $gizi['karbohidrat'] <= $kebutuhanGizi['karbohidrat'] * 0.2
+                ) {
+                    $rekomendasi[] = $item;
+                }
+            } else {
+                continue;
+            }
+        }
+
+        // Mengurutkan makanan berdasarkan kecocokan (opsional)
+        usort($rekomendasi, function ($a, $b) use ($kebutuhanGizi) {
+            return abs($a['kalori'] - $kebutuhanGizi['kalori']) <=> abs($b['kalori'] - $kebutuhanGizi['kalori']);
+        });
+
+        return response()->json(['message' => 'rekomendasi tersedia', 'data' => $rekomendasi], 200);
     }
 }
