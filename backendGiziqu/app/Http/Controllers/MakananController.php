@@ -18,6 +18,49 @@ class MakananController extends Controller
         $this->table = 'makanans';
     }
 
+
+    public function assignGiziLabels(array $gizi): array
+    {
+        // Definisikan batas untuk setiap label
+        $labels = [
+            'rendah' => 'Rendah',
+            'sedang_atau_tinggi' => 'Sedang atau Tinggi',
+            'bebas' => 'Bebas',
+        ];
+
+        $thresholds = [
+            'energi' => ['rendah' => 40, 'bebas' => 4],
+            'lemak' => ['rendah' => 3, 'bebas' => 0.5],
+            'gula' => ['rendah' => 5, 'bebas' => 0.5],
+            'natrium' => ['rendah' => 120, 'bebas' => 5],
+        ];
+
+        function getLabel($value, $thresholds, $labels)
+        {
+            // Prioritaskan label 'sedang_atau_tinggi' dan 'rendah'
+            if (isset($thresholds['bebas']) && $value <= $thresholds['bebas']) {
+                return $labels['bebas'];
+            } elseif (isset($thresholds['rendah']) && $value > $thresholds['rendah']) {
+                return $labels['sedang_atau_tinggi'];
+            } else {
+                // Default ke label 'rendah' jika tidak memenuhi syarat lain
+                return $labels['rendah'];
+            }
+        }
+
+        $labeledGizi = [];
+        foreach ($gizi as $komponen => $nilai) {
+            if (isset($thresholds[$komponen])) {
+                $labeledGizi[$komponen . '_label'] = getLabel($nilai, $thresholds[$komponen], $labels);
+            }
+        }
+
+        return $labeledGizi;
+    }
+
+
+
+
     public function create_makanan(Request $request)
     {
         // dd($request->input());
@@ -58,8 +101,14 @@ class MakananController extends Controller
             'vitamin_b3' => $request->input('vitamin_b3'),
             'vitamin_c' => $request->input('vitamin_c'),
             'serat' => $request->input('serat'),
-            'energi' => $request->input('energi')
+            'energi' => $request->input('energi'),
+            'gula' => $request->input('gula')
         ];
+        try {
+            $labeledGizi = $this->assignGiziLabels($gizi);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan saat memberi label gizi: ' . $e->getMessage()], 500);
+        }
 
         // Buat data makanan
         $makananData = [
@@ -69,7 +118,7 @@ class MakananController extends Controller
             'foto' => $fileName,
             'gizi' => $gizi,
             'takaran' => $request->input('takaran_per_saji'),
-            // Tambahkan data lain sesuai kebutuhan
+            'label_gizi' => $labeledGizi,
         ];
 
         // Simpan data ke database
@@ -236,6 +285,7 @@ class MakananController extends Controller
             'vitamin_c' => $request->input('vitamin_c') ?? $existingMakanan[$key]['gizi']['vitamin_c'],
             'serat' => $request->input('serat') ?? $existingMakanan[$key]['gizi']['serat'],
             'energi' => $request->input('energi') ?? $existingMakanan[$key]['gizi']['energi'],
+            'gula' => $request->input('gula') ?? $existingMakanan[$key]['gizi']['gula'],
         ];
 
         $makananData['gizi'] = $gizi;
